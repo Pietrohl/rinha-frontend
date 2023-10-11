@@ -1,9 +1,9 @@
 /* @refresh reload */
-import { render } from 'solid-js/web'
+import { hydrate, render } from "solid-js/web";
 
-import './index.css'
-import App from './App'
+import "./index.css";
+import App from "./App";
 
-const root = document.getElementById('root')
+const root = document.getElementById("root");
 
-render(() => <App />, root!)
+import.meta.env.DEV ? render(() => <App />, root!) : hydrate(() => <App />, root!);
