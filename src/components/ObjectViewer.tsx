@@ -1,32 +1,36 @@
 import { Component, For, JSX } from "solid-js";
-import { VirtualList } from "../utils/virtualList";
+import { VirtualObject } from "../utils/virtualObject";
 
 interface Props {
-  object: VirtualList;
+  object: VirtualObject;
 }
 
 const ObjectViewer: Component<Props> = (props: Props): JSX.Element => {
   return (
-    <For
-      each={props.object && props.object.computedItems}
-      fallback={<div>Loading...</div>}
-    >
-      {(item) => {
-        if (item.value instanceof VirtualList) {
+    <>
+      {" "}
+      {"{"}
+      height = {props.object.height}
+      <For
+        each={props.object && props.object.items.filter((item) => item.show())}
+        fallback={<div>Loading...</div>}
+      >
+        {(item) => {
+          if (item.value instanceof VirtualObject)
+            return (
+              <div>
+                {item.key}: <ObjectViewer object={item.value} />
+              </div>
+            );
+
           return (
             <div>
-              {item.key}: <ObjectViewer object={item.value} />
+              {item.key}: {item.value}
             </div>
           );
-        }
-
-        return (
-          <div>
-            {item.key}: {item.value}
-          </div>
-        );
-      }}
-    </For>
+        }}
+      </For>
+    </>
   );
 };
 
