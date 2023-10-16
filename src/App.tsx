@@ -1,22 +1,24 @@
-import { createSignal, createEffect } from "solid-js";
+import { createSignal } from "solid-js";
 import solidLogo from "./assets/solid.svg";
 import viteLogo from "./assets/vite.svg";
 import "./App.css";
+import ObjectViewer from "./components/ObjectViewer";
+import { VirtualList } from "./utils/virtualList";
+import VirtualizedPanel from "./components/VirtualizedPanel";
 
 function App() {
   const [count, setCount] = createSignal(0);
-  const [fileContent, setFileContent] = createSignal<string | null>(null);
-
+  const [fileContent, setFileContent] = createSignal<VirtualList>(
+    new VirtualList([])
+  );
 
   const reader = new FileReader();
 
-
   reader.onload = (e) => {
-    if(!e.target) return
-    setFileContent(e.target.result as string);
-    console.log("read!");
+    if (!e.target || !e.target.result) return;
+    setFileContent(new VirtualList(Object.entries(JSON.parse(e.target.result as string))));
+    alert("read!");
   };
-
 
   return (
     <>
@@ -50,7 +52,8 @@ function App() {
         Click on the Vite and Solid logos to learn more
       </p>
 
-      {fileContent()?.slice(0, 100)}
+      <ObjectViewer object={fileContent()} />
+      <VirtualizedPanel />
     </>
   );
 }
