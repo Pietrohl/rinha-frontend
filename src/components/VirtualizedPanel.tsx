@@ -1,46 +1,75 @@
-import { For, createSignal } from "solid-js";
+import {
+  createContext,
+  createMemo,
+  createSignal,
+  onMount,
+  useContext,
+} from "solid-js";
 import { VirtualObject } from "../utils/virtualObject";
 import ObjectViewer from "./ObjectViewer";
-
+import { createScheduled, throttle } from "@solid-primitives/scheduled";
+import { isServer } from "solid-js/web";
 interface Props {
-  object: object;
+  object: VirtualObject;
 }
-function VirtualizedPanel(props: Props) {
-  const [scroll, setScroll] = createSignal<{
-    scrollY: number;
-  }>({ scrollY: 0 });
+const [scrollY, setScrollY] = createSignal<number>(0);
+const scheduled = createScheduled((fn) => throttle(fn, 500));
 
-  const object = () => new VirtualObject(Object.entries(props.object));
+const VirtualPanelContext = createContext();
+
+function VirtualizedPanel(props: Props) {
+  const throttleScrollY = createMemo((p: number = 0) => {
+    // track source signal
+    const value = scrollY();
+    // track the debounced signal and check if it's dirty
+    return scheduled() ? value : p;
+  });
 
   const lineHeight = 20;
-  const viewportHeight = window.innerHeight * 0.8;
-  const buffer = 500; 
+  const viewportHeight = isServer ? 0 : window.innerHeight;
+  const buffer = 500;
+
+  onMount(() => {
+    setScrollY(0);
+  });
+
+  const panel = [throttleScrollY, { lineHeight, viewportHeight, buffer }];
 
   return (
     <>
-      {object().items.filter((item) => item.show()).length}
       <div
         onscroll={(e) => {
-          setScroll({
-            scrollY: e.currentTarget.scrollTop,
-          });
+          setScrollY(e.currentTarget.scrollTop);
         }}
         style={{
-          height: "80vh",
+          height: "100vh",
+          width: "100vh",
           overflow: "auto",
           position: "relative",
         }}
       >
         {/* this should be set to the total size of your virtualized area */}
-        <For
-          each={object().items.filter((item) => item.show())}
-          fallback={<div>Loading...</div>}
+        <div
+          style={{
+            height: `${props.object.height * lineHeight}px`,
+          }}
         >
-          {(item) => <ObjectViewer object={item.value} />}
-        </For>
+          <VirtualPanelContext.Provider value={panel}>
+            <ObjectViewer object={props.object} />
+          </VirtualPanelContext.Provider>
+        </div>
       </div>
     </>
   );
+}
+
+export function useVirtualPanel() {
+  const context = useContext(VirtualPanelContext);
+
+  if (!context)
+    throw new Error("useVirtualPanel must be used within a VirtualizedPanel");
+
+  return context;
 }
 
 export default VirtualizedPanel;
