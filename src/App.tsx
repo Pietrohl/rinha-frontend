@@ -1,36 +1,61 @@
-import { createSignal } from "solid-js";
+import { Show, createEffect, createResource, createSignal } from "solid-js";
 import "./App.css";
 import VirtualizedPanel from "./components/VirtualizedPanel";
 import { VirtualObject } from "./utils/virtualObject";
 import { isServer } from "solid-js/web";
 
+const parseObject = async (file: File | undefined) => {
+  const utf8Decoder = new TextDecoder("utf-8");
+  let result;
+  if (isServer) return null;
+
+  if (!file) {
+    return null;
+  }
+
+  let reminder = "";
+  const stream = file.stream().getReader();
+
+  await stream
+    .read()
+    .then(function processStream({ done, value }): any {
+      if (done) return;
+
+      if (value) {
+        const chunck = utf8Decoder.decode(value, { stream: true });
+
+        console.log("value", chunck);
+        reminder += chunck;
+      }
+
+      return stream.read().then(processStream);
+    })
+    .then(() => {
+      // console.log("reminder", reminder);
+      result = new VirtualObject(Object.entries(JSON.parse(reminder)));
+    });
+  return result;
+};
+
 function App() {
-  const [fileContent, setFileContent] = createSignal<object>({});
+  const [fileContent, setFileContent] = createSignal<File | undefined>();
+  const [objectData] = createResource(fileContent, parseObject);
 
-  if (!isServer) {
-    var reader = new FileReader();
-    
-      reader.onload = (e) => {
-        if (!e.target || !e.target.result) return;
-        setFileContent(JSON.parse(e.target.result.toString()));
-        alert("read!");
-      };
-    }
+  // instead of using the file reader, rewrite the virtual object to use the FILE api
 
-
-  const object = () => new VirtualObject(Object.entries(fileContent()));
   return (
     <>
       <div>
         <input
-          onInput={(e) => reader.readAsText(e.target.files?.[0] as Blob)}
+          onInput={(e) => setFileContent(() => e.target.files?.[0])}
           type="file"
           id="input"
           accept=".json"
         />
       </div>
-
-      <VirtualizedPanel object={object()} />
+      <Show when={objectData()}>
+        {/* <VirtualizedPanel object={objectData()!} /> */}
+      </Show>
     </>
   );
 }
