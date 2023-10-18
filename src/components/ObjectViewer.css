@@ -1,0 +1,76 @@
+.object {
+  margin: 0;
+  padding: 0 0 0 20px;
+  line-height: 20px;
+  position: relative;
+}
+
+.object > .parameter {
+  display: block;
+  margin: 0 0 0 20px;
+  padding: 0;
+  line-height: 20px;
+  position: relative;
+}
+
+.object::before {
+  position: absolute;
+  width: 1px;
+  top: 20px;
+  bottom: 20px;
+  left: 10px;
+  background-color: #000;
+  content: "";
+}
+
+.object[open]::after {
+  /* content: ""; */
+  content: "}";
+  bottom: 0;
+  left: 0;
+  color: #000;
+  display: block;
+}
+
+.object-array[open]::after {
+  content: "]";
+}
+
+.object > summary {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  transform: translateX(-12px);
+  color: #000;
+}
+
+.object > summary::after {
+  /* content: ""; */
+  content: "{...}";
+  display: inline-block;
+  margin-left: 0.5ex;
+  color: #000;
+}
+
+.object-array > summary::after {
+  content: "[...]";
+}
+
+.object[open] > summary::after {
+  /* content: ""; */
+  content: "{";
+  bottom: 0;
+  left: 0;
+}
+
+.object-array[open] > summary::after {
+  content: "[";
+}
+
+details > summary {
+  list-style: none;
+}
+
+details > summary::-webkit-details-marker {
+  display: none;
+}

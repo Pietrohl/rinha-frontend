@@ -1,9 +1,10 @@
 import { Accessor, Component, For, JSX } from "solid-js";
 import { VirtualObject } from "../utils/virtualObject";
 import { useVirtualPanel } from "./VirtualizedPanel";
-
+import "./ObjectViewer.css";
 interface Props {
   object: VirtualObject;
+  key: string;
 }
 
 const ObjectViewer: Component<Props> = (props: Props): JSX.Element => {
@@ -15,30 +16,27 @@ const ObjectViewer: Component<Props> = (props: Props): JSX.Element => {
 
   return (
     <>
-      <For
-        each={props.object.items.filter(
-          (item) =>
-            item.lineIndex * lineHeight < scrollY() + viewportHeight + buffer ||
-            (item.lineIndex + item.height) * lineHeight < scrollY() - buffer
-        )}
-        fallback={<div>Loading...</div>}
+      <details
+        open
+        class={`object ${props.object.type === "array" ? "object-array" : ""}`}
       >
-        {(item) => {
-          if (item.value instanceof VirtualObject)
-            return (
-              <div style={{ height: `${lineHeight}` }}>
-                {item.lineIndex} {item.key}: {`{`}{" "}
-                <ObjectViewer object={item.value} /> {`}`}
-              </div>
-            );
+        <summary>
+          {props.key}: 
+        </summary>
 
-          return (
-            <div style={{ height: `${lineHeight}` }}>
-              {item.lineIndex} {item.key}: {item.value}
-            </div>
-          );
-        }}
-      </For>
+        <For each={props.object.items} fallback={<div>Loading...</div>}>
+          {(item) => {
+            if (item.value instanceof VirtualObject)
+              return <ObjectViewer key={item.key} object={item.value} />;
+
+            return (
+              <p class='parameter' style={{ height: `${lineHeight}` }}>
+                {item.key}: <span>{item.value}</span>
+              </p>
+            );
+          }}
+        </For>
+      </details>
     </>
   );
 };

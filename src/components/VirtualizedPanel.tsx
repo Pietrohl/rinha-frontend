@@ -42,8 +42,8 @@ function VirtualizedPanel(props: Props) {
           setScrollY(e.currentTarget.scrollTop);
         }}
         style={{
-          height: "100vh",
-          width: "100vh",
+          height: "80vh",
+          width: "80vh",
           overflow: "auto",
           position: "relative",
         }}
@@ -55,7 +55,7 @@ function VirtualizedPanel(props: Props) {
           }}
         >
           <VirtualPanelContext.Provider value={panel}>
-            <ObjectViewer object={props.object} />
+            <ObjectViewer key="AllTypes" object={props.object} />
           </VirtualPanelContext.Provider>
         </div>
       </div>
