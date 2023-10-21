@@ -1,12 +1,31 @@
+type tokenTypes =
+  | "START_OBJECT"
+  | "END_OBJECT"
+  | "START_ARRAY"
+  | "END_ARRAY"
+  | "KEY"
+  | "VALUE";
+// Json data types constants
+export type JSONDataTypes =
+  | "string"
+  | "number"
+  | "boolean"
+  | "object"
+  | "array"
+  | "null";
+
+export type tokenType = { type: tokenTypes; value?: string; level: number };
+
 export class JsonStreamTokenizer {
   currentToken: string[];
-  state: any[];
+  state: JSONDataTypes[];
   nestingLevel: number;
-
-  constructor() {
+  onToken: Function;
+  constructor(onToken: Function) {
     this.nestingLevel = 0;
     this.currentToken = [];
-    this.state = []; // Stack to track the current state
+    this.state = [];
+    this.onToken = onToken;
   }
 
   // Process a single character
@@ -63,7 +82,7 @@ export class JsonStreamTokenizer {
   }
 
   // Emit the buffered token, if any
-  emitToken(token?: { type: string; value?: string; level?: number; }) {
+  emitToken(token?: tokenType) {
     debugger;
     if (!token && this.currentToken.length > 0) {
       // If no explicit token is passed, emit the current buffered token as a VALUE
@@ -75,7 +94,8 @@ export class JsonStreamTokenizer {
       this.currentToken = []; // Clear the current token
     }
     if (token) {
-      // console.log(token);
+      console.log(token);
+      this.onToken(token);
     }
   }
 

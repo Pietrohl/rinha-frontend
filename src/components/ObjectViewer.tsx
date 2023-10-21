@@ -1,9 +1,9 @@
 import { Accessor, Component, For, JSX } from "solid-js";
-import { VirtualObject } from "../utils/virtualObject";
+import { VirtualList } from "../utils/virtualList";
 import { useVirtualPanel } from "./VirtualizedPanel";
 import "./ObjectViewer.css";
 interface Props {
-  object: VirtualObject;
+  object: VirtualList;
   key: string;
 }
 
@@ -26,7 +26,7 @@ const ObjectViewer: Component<Props> = (props: Props): JSX.Element => {
 
         <For each={props.object.items} fallback={<div>Loading...</div>}>
           {(item) => {
-            if (item.value instanceof VirtualObject)
+            if (item.value instanceof VirtualList)
               return <ObjectViewer key={item.key} object={item.value} />;
 
             return (

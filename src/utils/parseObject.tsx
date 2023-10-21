@@ -1,12 +1,12 @@
 import { JsonStreamTokenizer } from "./JsonStreamTokenizer";
-import { VirtualObject } from "./virtualObject";
+import { VirtualList } from "./virtualList";
 import { isServer } from "solid-js/web";
 
-export const tokenizer = new JsonStreamTokenizer();
-
 export const parseObject = async (file: File | undefined) => {
+  const object = new VirtualList();
+  const tokenizer = new JsonStreamTokenizer(object.push.bind(object));
+
   const utf8Decoder = new TextDecoder("utf-8");
-  let result;
   if (isServer) return null;
 
   if (!file) {
@@ -32,10 +32,10 @@ export const parseObject = async (file: File | undefined) => {
     })
     .then(() => {
       tokenizer.end();
-      result = new VirtualObject(Object.entries(JSON.parse(reminder)));
       console.log("End of stream");
+      console.log(object);
       console.log("Time taken: ", Math.round((Date.now() - startTime) / 1000));
     });
 
-  return result;
+  return object;
 };

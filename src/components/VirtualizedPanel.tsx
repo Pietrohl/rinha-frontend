@@ -1,21 +1,12 @@
-import {
-  createContext,
-  createMemo,
-  createSignal,
-  onMount,
-  useContext,
-} from "solid-js";
-import { VirtualObject } from "../utils/virtualObject";
-import ObjectViewer from "./ObjectViewer";
+import { For, createMemo, createSignal } from "solid-js";
+import { VirtualList } from "../utils/virtualList";
 import { createScheduled, throttle } from "@solid-primitives/scheduled";
 import { isServer } from "solid-js/web";
 interface Props {
-  object: VirtualObject;
+  object: VirtualList;
 }
-const [scrollY, setScrollY] = createSignal<number>(0);
 const scheduled = createScheduled((fn) => throttle(fn, 500));
-
-const VirtualPanelContext = createContext();
+const [scrollY, setScrollY] = createSignal<number>(0);
 
 function VirtualizedPanel(props: Props) {
   const throttleScrollY = createMemo((p: number = 0) => {
@@ -28,12 +19,6 @@ function VirtualizedPanel(props: Props) {
   const lineHeight = 20;
   const viewportHeight = isServer ? 0 : window.innerHeight;
   const buffer = 500;
-
-  onMount(() => {
-    setScrollY(0);
-  });
-
-  const panel = [throttleScrollY, { lineHeight, viewportHeight, buffer }];
 
   return (
     <>
@@ -51,25 +36,19 @@ function VirtualizedPanel(props: Props) {
         {/* this should be set to the total size of your virtualized area */}
         <div
           style={{
-            height: `${props.object.height * lineHeight}px`,
+            height: `${props.object.items.length * lineHeight}px`,
           }}
         >
-          <VirtualPanelContext.Provider value={panel}>
-            <ObjectViewer key="AllTypes" object={props.object} />
-          </VirtualPanelContext.Provider>
+          <For each={props.object.items}>
+            {(item, index) => {
+              console.log(item, "index: ", index());
+              return <div>{index()}</div>;
+            }}
+          </For>
         </div>
       </div>
     </>
   );
-}
-
-export function useVirtualPanel() {
-  const context = useContext(VirtualPanelContext);
-
-  if (!context)
-    throw new Error("useVirtualPanel must be used within a VirtualizedPanel");
-
-  return context;
 }
 
 export default VirtualizedPanel;
