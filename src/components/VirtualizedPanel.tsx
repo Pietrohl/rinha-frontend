@@ -2,6 +2,7 @@ import { For, createMemo, createSignal } from "solid-js";
 import { VirtualList } from "../utils/virtualList";
 import { createScheduled, throttle } from "@solid-primitives/scheduled";
 import { isServer } from "solid-js/web";
+// import { isServer } from "solid-js/web";
 interface Props {
   object: VirtualList;
 }
@@ -39,11 +40,26 @@ function VirtualizedPanel(props: Props) {
             height: `${props.object.items.length * lineHeight}px`,
           }}
         >
-          <For each={props.object.items}>
-            {(item, index) => {
-              console.log(item, "index: ", index());
-              return <div>{index()}</div>;
-            }}
+          {throttleScrollY()}
+          <br />
+          {Math.floor(
+            (throttleScrollY() + viewportHeight + buffer) / lineHeight
+          )}
+          <For
+            each={props.object.items.slice(
+              1,
+              Math.floor(viewportHeight / lineHeight)
+            )}
+          >
+            {(item) => (
+              <div
+                class={`object ${item.type === "array" ? "object-array" : ""}`}
+                style={{ "padding-left": `${(item.nestedLevel - 1) * 12}px` }}
+              >
+                <span>{item.key}:</span>
+                {item.value}
+              </div>
+            )}
           </For>
         </div>
       </div>

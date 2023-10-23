@@ -8,16 +8,13 @@ export type VirtualObjectToken = {
 };
 
 export class VirtualList {
-  protected items;
+  items;
   private state: Array<"object" | "array"> = [];
   private lastToken?: tokenType;
 
-
   constructor() {
-    this.items = new Array<VirtualObjectToken>()
+    this.items = new Array<VirtualObjectToken>();
   }
-
-
 
   public push(item: tokenType) {
     if (item.type === "KEY") {

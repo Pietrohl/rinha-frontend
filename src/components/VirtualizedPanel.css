@@ -1,0 +1,25 @@
+
+.object {
+  margin: 0;
+  padding: 0 0 0 20px;
+  line-height: 20px;
+  position: relative;
+}
+.object::before {
+  content: "";
+  position: absolute;
+  width: 1px;
+  top: 20px;
+  bottom: 20px;
+  left: 10px;
+  background-color: #000;
+}
+
+.object::after {
+  content: "";
+  display: inline-block;
+  margin-left: 0.5ex;
+  color: #000;
+  bottom: 0;
+  left: 0;
+}

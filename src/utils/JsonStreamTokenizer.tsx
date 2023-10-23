@@ -94,7 +94,6 @@ export class JsonStreamTokenizer {
       this.currentToken = []; // Clear the current token
     }
     if (token) {
-      console.log(token);
       this.onToken(token);
     }
   }

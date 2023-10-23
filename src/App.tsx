@@ -1,11 +1,11 @@
-import { Show, createResource, createSignal } from "solid-js";
+import { Show, createSignal } from "solid-js";
 import "./App.css";
 import VirtualizedPanel from "./components/VirtualizedPanel";
 import { parseObject } from "./utils/parseObject";
 
 function App() {
   const [fileContent, setFileContent] = createSignal<File | undefined>();
-  const [objectData] = createResource(fileContent, parseObject);
+  const objectData = () => parseObject(fileContent());
 
   return (
     <>
