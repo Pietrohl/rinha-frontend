@@ -31,31 +31,31 @@ export class JsonStreamTokenizer {
   processChar(char: string) {
     switch (char) {
       case "{":
-        this.emitToken(); 
+        this.emitToken();
         this.emitToken({ type: "START_OBJECT", level: this.nestingLevel++ });
         this.state.push("object");
         break;
       case "}":
-        this.emitToken(); 
+        this.emitToken();
         this.emitToken({ type: "END_OBJECT", level: --this.nestingLevel });
         if (this.state.pop() !== "object") {
           throw new Error("Unexpected END_OBJECT");
         }
         break;
       case "[":
-        this.emitToken(); 
+        this.emitToken();
         this.emitToken({ type: "START_ARRAY", level: this.nestingLevel++ });
         this.state.push("array");
         break;
       case "]":
-        this.emitToken(); 
-        this.emitToken({ type: "END_ARRAY", level: --this.nestingLevel});
+        this.emitToken();
+        this.emitToken({ type: "END_ARRAY", level: --this.nestingLevel });
         if (this.state.pop() !== "array") {
           throw new Error("Unexpected END_ARRAY");
         }
         break;
       case ",":
-        this.emitToken(); 
+        this.emitToken();
         break;
       case ":":
         this.emitToken({
@@ -68,12 +68,12 @@ export class JsonStreamTokenizer {
       case " ":
       case "\n":
         if (this.currentToken.length > 0) {
-          this.currentToken.push(char); 
+          this.currentToken.push(char);
         }
         break;
 
       default:
-        this.currentToken.push(char); 
+        this.currentToken.push(char);
         break;
     }
   }
@@ -85,11 +85,13 @@ export class JsonStreamTokenizer {
         value: this.currentToken.join("").trim(),
         level: this.nestingLevel,
       };
-      this.currentToken = []; 
+      this.currentToken = [];
     }
     if (token) {
       // console.log(token);
-      new Promise(() => this.onToken(token));
+      setTimeout(() => {
+        this.onToken(token);
+      }, 1);
     }
   }
 
@@ -100,7 +102,7 @@ export class JsonStreamTokenizer {
   }
 
   end() {
-    this.emitToken(); 
+    this.emitToken();
     if (this.state.length > 0) {
       throw new Error("Unexpected end of stream");
     }

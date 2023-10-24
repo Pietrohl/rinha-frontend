@@ -1,10 +1,20 @@
-import { Match, Show, Switch } from "solid-js";
+import { Match, Switch } from "solid-js";
 import "./App.css";
 import VirtualizedPanel from "./components/VirtualizedPanel";
-import { parseObject, object } from "./utils/parseObject";
+import { parseObject } from "./utils/parseObject";
+import { createMutable } from "solid-js/store";
+import { VirtualList } from "./utils/virtualList";
 
 function App() {
-  // const [fileContent, setFileContent] = createSignal<File | undefined>();
+const object = createMutable(new VirtualList());
+// const [fileContent, setFileContent] = createSignal<File | undefined>();
+
+
+
+
+
+
+
 
   return (
     <>
@@ -12,7 +22,7 @@ function App() {
         fallback={
           <div>
             <input
-              onInput={(e) => parseObject(e.target.files?.[0])}
+              onInput={(e) => parseObject(e.target.files?.[0], object)}
               type="file"
               id="input"
               accept=".json"

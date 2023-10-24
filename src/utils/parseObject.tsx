@@ -1,10 +1,8 @@
-import { createMutable } from "solid-js/store";
 import { JsonStreamTokenizer } from "./JsonStreamTokenizer";
 import { VirtualList } from "./virtualList";
 import { isServer } from "solid-js/web";
 
-export const object = createMutable(new VirtualList());
-export function parseObject(file: File | undefined) {
+export function parseObject(file: File | undefined, object: VirtualList) {
   object.clear();
   const tokenizer = new JsonStreamTokenizer(object.push.bind(object));
 
