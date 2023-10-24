@@ -9,11 +9,18 @@ export type VirtualObjectToken = {
 
 export class VirtualList {
   items;
+  error = '';
   private state: Array<"object" | "array"> = [];
   private lastToken?: tokenType;
 
   constructor() {
     this.items = new Array<VirtualObjectToken>();
+  }
+
+  public clear() {
+    this.items = new Array<VirtualObjectToken>();
+    this.state = [];
+    this.lastToken = undefined;
   }
 
   public push(item: tokenType) {

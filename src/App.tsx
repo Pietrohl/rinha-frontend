@@ -1,25 +1,32 @@
-import { Show, createSignal } from "solid-js";
+import { Match, Show, Switch } from "solid-js";
 import "./App.css";
 import VirtualizedPanel from "./components/VirtualizedPanel";
-import { parseObject } from "./utils/parseObject";
+import { parseObject, object } from "./utils/parseObject";
 
 function App() {
-  const [fileContent, setFileContent] = createSignal<File | undefined>();
-  const objectData = () => parseObject(fileContent());
+  // const [fileContent, setFileContent] = createSignal<File | undefined>();
 
   return (
     <>
-      <div>
-        <input
-          onInput={(e) => setFileContent(() => e.target.files?.[0])}
-          type="file"
-          id="input"
-          accept=".json"
-        />
-      </div>
-      <Show when={objectData()}>
-        <VirtualizedPanel object={objectData()!} />
-      </Show>
+      <Switch
+        fallback={
+          <div>
+            <input
+              onInput={(e) => parseObject(e.target.files?.[0])}
+              type="file"
+              id="input"
+              accept=".json"
+            />
+          </div>
+        }
+      >
+        <Match when={object.error}>
+          <div>Error: {object.error} </div>
+        </Match>
+        <Match when={object.items.length > 0}>
+          <VirtualizedPanel object={object!} />
+        </Match>
+      </Switch>
     </>
   );
 }

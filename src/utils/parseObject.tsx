@@ -1,9 +1,11 @@
+import { createMutable } from "solid-js/store";
 import { JsonStreamTokenizer } from "./JsonStreamTokenizer";
 import { VirtualList } from "./virtualList";
 import { isServer } from "solid-js/web";
 
-export const parseObject = (file: File | undefined) => {
-  const object = new VirtualList();
+export const object = createMutable(new VirtualList());
+export function parseObject(file: File | undefined) {
+  object.clear();
   const tokenizer = new JsonStreamTokenizer(object.push.bind(object));
 
   const utf8Decoder = new TextDecoder("utf-8");
@@ -17,12 +19,11 @@ export const parseObject = (file: File | undefined) => {
   const stream = file.stream().getReader();
   stream
     .read()
-    .then(function processStream({ done, value }): any {
+    .then(async function processStream({ done, value }): Promise<any> {
       if (done) return;
 
       if (value) {
         const chunck = utf8Decoder.decode(value, { stream: true });
-
         tokenizer.processChunk(chunck);
         reminder += chunck;
       }
@@ -31,7 +32,9 @@ export const parseObject = (file: File | undefined) => {
     })
     .then(() => {
       tokenizer.end();
+    })
+    .catch((e: Error) => {
+      debugger;
+      object.error = e.message;
     });
-
-  return object;
-};
+}

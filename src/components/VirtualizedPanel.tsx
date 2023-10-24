@@ -20,6 +20,13 @@ function VirtualizedPanel(props: Props) {
   const lineHeight = 20;
   const viewportHeight = isServer ? 0 : window.innerHeight;
   const buffer = 500;
+  const visibleItems = () => props.object.items.slice(
+    1,
+    Math.floor(
+      (viewportHeight + throttleScrollY() + buffer) / lineHeight
+    )
+  )
+
 
   return (
     <>
@@ -46,10 +53,7 @@ function VirtualizedPanel(props: Props) {
             (throttleScrollY() + viewportHeight + buffer) / lineHeight
           )}
           <For
-            each={props.object.items.slice(
-              1,
-              Math.floor(viewportHeight / lineHeight)
-            )}
+            each={visibleItems()}
           >
             {(item) => (
               <div
