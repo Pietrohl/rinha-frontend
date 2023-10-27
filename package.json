@@ -9,7 +9,8 @@
     "build:client": "vite build --outDir public",
     "build:server": "vite build --outDir lib --ssr src/entry-server.tsx",
     "build:static": "node generate.js",
-    "preview": "vite preview --outDir public"
+    "preview": "vite preview --outDir public",
+    "test": "vitest"
   },
   "dependencies": {
     "@solid-primitives/scheduled": "^1.4.1",
@@ -19,8 +20,10 @@
   },
   "devDependencies": {
     "@types/node": "^20.8.4",
+    "jsdom": "^22.1.0",
     "typescript": "^5.0.2",
     "vite": "^4.4.5",
-    "vite-plugin-solid": "^2.7.0"
+    "vite-plugin-solid": "^2.7.0",
+    "vitest": "^0.34.6"
   }
 }
