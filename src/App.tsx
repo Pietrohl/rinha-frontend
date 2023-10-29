@@ -1,20 +1,85 @@
-import { Match, Switch } from "solid-js";
+import { Match, Switch, createEffect, createSignal, from, on } from "solid-js";
 import "./App.css";
 import VirtualizedPanel from "./components/VirtualizedPanel";
-import { parseObject } from "./utils/parseObject";
 import { createMutable } from "solid-js/store";
-import { VirtualList } from "./utils/virtualList";
+import { JsonStreamTokenizer, Token } from "./utils/JsonStreamTokenizer";
+import { isServer } from "solid-js/web";
+
+let buffer = new ArrayBuffer(16384);
+const parser = new JsonStreamTokenizer();
 
 function App() {
-const object = createMutable(new VirtualList());
-// const [fileContent, setFileContent] = createSignal<File | undefined>();
+  const utf8Decoder = new TextDecoder("utf-8");
 
+  const list = createMutable({ error: "", done: true, items: [] as Token[] });
+  const [fileContent, setFileContent] = createSignal<File | undefined>();
 
+  const observable = from<Token>((set) => {
+    const listener = parser.subscribe(set);
+    return () => {
+      parser.unsubscribe(listener);
+    };
+  });
 
+  createEffect(
+    on(observable, () => {
+      const token = observable();
+      if (token) list.items.push(token);
+    })
+  );
 
+  createEffect(
+    on(
+      fileContent,
+      async () => {
+        if (isServer) return;
 
+        performance.mark("FileReadStart");
+        const file = fileContent();
+        if (!file) {
+          return;
+        }
+        const stream = file.stream().getReader({ mode: "byob" });
+        list.items = [];
 
+        try {
+          while (true) {
+            let bufferView = new Uint8Array(buffer);
+            performance.measure("FileReadTick", { start: "FileReadStart" });
+            const { done, value } = await stream.read(bufferView);
 
+            if (done) {
+              parser.end();
+              performance.mark("FileReadEnd");
+              console.log(
+                "Ticks",
+                performance.getEntriesByName("FileReadTick")
+              );
+              console.log(
+                "time: ",
+                performance.measure("FileReadEnd", "FileReadStart")
+              );
+              list.done = true;
+              break;
+            }
+
+            if (value) {
+              buffer = value.buffer.slice(
+                value.byteOffset,
+                value.byteOffset + value.byteLength
+              );
+              const chunck = utf8Decoder.decode(value, { stream: true });
+              parser.processChunk(chunck);
+              await new Promise((resolve) => setTimeout(resolve, 0));
+            }
+          }
+        } catch (e) {
+          list.error = "Invalid Json!";
+        }
+      },
+      { defer: true }
+    )
+  );
 
   return (
     <>
@@ -22,7 +87,7 @@ const object = createMutable(new VirtualList());
         fallback={
           <div>
             <input
-              onInput={(e) => parseObject(e.target.files?.[0], object)}
+              onInput={(e) => setFileContent(() => e.currentTarget.files?.[0])}
               type="file"
               id="input"
               accept=".json"
@@ -30,11 +95,11 @@ const object = createMutable(new VirtualList());
           </div>
         }
       >
-        <Match when={object.error}>
-          <div>Error: {object.error} </div>
+        <Match when={list.error}>
+          <div>Error: {list.error} </div>
         </Match>
-        <Match when={object.items.length > 0}>
-          <VirtualizedPanel object={object!} />
+        <Match when={list.items.length > 0}>
+          <VirtualizedPanel list={list.items} />
         </Match>
       </Switch>
     </>

@@ -1,12 +1,12 @@
 import { For, createMemo, createSignal } from "solid-js";
-import { VirtualList } from "../utils/virtualList";
 import { createScheduled, throttle } from "@solid-primitives/scheduled";
 import { isServer } from "solid-js/web";
+import { Token } from "../utils/JsonStreamTokenizer";
 // import { isServer } from "solid-js/web";
 interface Props {
-  object: VirtualList;
+  list: Token[];
 }
-const scheduled = createScheduled((fn) => throttle(fn, 500));
+const scheduled = createScheduled((fn) => throttle(fn, 200));
 const [scrollY, setScrollY] = createSignal<number>(0);
 
 function VirtualizedPanel(props: Props) {
@@ -20,13 +20,13 @@ function VirtualizedPanel(props: Props) {
   const lineHeight = 20;
   const viewportHeight = isServer ? 0 : window.innerHeight;
   const buffer = 500;
-  const visibleItems = () => props.object.items.slice(
+  const start = () => Math.max(
     1,
-    Math.floor(
-      (viewportHeight + throttleScrollY() + buffer) / lineHeight
-    )
-  )
-
+    Math.floor((throttleScrollY() - buffer) / lineHeight)
+  );
+  const end =() => Math.floor(
+    (viewportHeight + throttleScrollY() + buffer) / lineHeight
+  );
 
   return (
     <>
@@ -36,29 +36,28 @@ function VirtualizedPanel(props: Props) {
         }}
         style={{
           height: "80vh",
-          width: "80vh",
+          "min-width": "90vh",
           overflow: "auto",
           position: "relative",
         }}
       >
-        {/* this should be set to the total size of your virtualized area */}
         <div
           style={{
-            height: `${props.object.items.length * lineHeight}px`,
+            height: `${props.list.length * lineHeight}px`,
           }}
         >
-          {throttleScrollY()}
           <br />
-          {Math.floor(
-            (throttleScrollY() + viewportHeight + buffer) / lineHeight
-          )}
-          <For
-            each={visibleItems()}
-          >
-            {(item) => (
+          <For each={props.list.slice(start(), end())}>
+            {(item, index) => (
               <div
-                class={`object ${item.type === "array" ? "object-array" : ""}`}
-                style={{ "padding-left": `${(item.nestedLevel - 1) * 12}px` }}
+                class={`object ${
+                  item.type === "BEGIN_ARRAY" ? "object-array" : ""
+                }`}
+                style={{
+                  "padding-left": `${(item.depth - 1) * 12}px`,
+                  position: "absolute",
+                  top: `${(item.index || index()) * lineHeight}px`,
+                }}
               >
                 <span>{item.key}:</span>
                 {item.value}

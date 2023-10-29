@@ -15,13 +15,21 @@ enum State {
 }
 
 type TokenDataType =
-  "BEGIN_OBJECT" | "END_OBJECT" | "BEGIN_ARRAY" | "END_ARRAY" | "STRING" | "NUMBER"| "BOOLEAN" | "NULL" ;
+  | "BEGIN_OBJECT"
+  | "END_OBJECT"
+  | "BEGIN_ARRAY"
+  | "END_ARRAY"
+  | "STRING"
+  | "NUMBER"
+  | "BOOLEAN"
+  | "NULL";
 
-interface Token {
+export interface Token {
   type: TokenDataType;
+  depth: number;
   key?: string | number;
   value?: any;
-  depth: number;
+  index?: number;
 }
 
 type TokenListener = (token: Token) => void;
@@ -33,13 +41,22 @@ export class JsonStreamTokenizer {
   private depth: number = 0;
   private arrayIndices: number[] = [];
   private keyStack: (string | number)[] = [];
-  // private tokens: Token[] = [];
+  private count = 0;
 
   subscribe(listener: TokenListener) {
     this.listeners.push(listener);
+    return listener;
+  }
+
+  unsubscribe(listener: TokenListener) {
+    const index = this.listeners.indexOf(listener);
+    if (index > -1) {
+      this.listeners.splice(index, 1);
+    }
   }
 
   private emit(token: Token) {
+    token.index = this.count++;
     token.depth = this.depth;
     // this.tokens.push(token);
     for (const listener of this.listeners) {
