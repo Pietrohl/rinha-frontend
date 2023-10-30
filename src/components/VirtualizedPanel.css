@@ -1,25 +1,58 @@
-
 .object {
   margin: 0;
-  padding: 0 0 0 20px;
-  line-height: 20px;
+  padding: 0;
+  line-height: 28.244px;
   position: relative;
+  font-weight: 400;
+  white-space: pre-wrap;
 }
-.object::before {
+.padding::before {
   content: "";
   position: absolute;
   width: 1px;
-  top: 20px;
-  bottom: 20px;
-  left: 10px;
-  background-color: #000;
+  height: 28.244px;
+  background-color: #bfbfbf;
 }
 
 .object::after {
   content: "";
   display: inline-block;
   margin-left: 0.5ex;
-  color: #000;
+  color: #f2cab8;
+  font-weight: bold;
   bottom: 0;
   left: 0;
 }
+
+.object-array::after {
+  content: "[";
+}
+
+.object-array-end::after {
+  content: "]";
+}
+
+.padding {
+  padding: 0;
+  margin: 0;
+  margin-right: 21px;
+}
+
+.object-string > .value::after,
+.object-string > .value::before {
+  content: '"';
+}
+
+.key {
+  color: #4e9590;
+}
+
+.array-key {
+  color: #bfbfbf;
+}
+
+.value {
+  overflow: hidden;
+  white-space: nowrap;
+}
+

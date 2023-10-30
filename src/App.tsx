@@ -99,6 +99,7 @@ function App() {
           <div>Error: {list.error} </div>
         </Match>
         <Match when={list.items.length > 0}>
+          <h2>{fileContent()?.name}</h2>
           <VirtualizedPanel list={list.items} />
         </Match>
       </Switch>

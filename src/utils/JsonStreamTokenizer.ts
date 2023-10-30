@@ -56,6 +56,7 @@ export class JsonStreamTokenizer {
   }
 
   private emit(token: Token) {
+    if (token.type === "END_OBJECT") return;
     token.index = this.count++;
     token.depth = this.depth;
     // this.tokens.push(token);

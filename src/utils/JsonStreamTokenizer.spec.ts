@@ -41,8 +41,6 @@ describe("JsonStreamTokenizer", () => {
       { type: "STRING", value: "empty1", index: 5, depth: 3, key: 0 },
       { type: "STRING", value: "empty2", index: 6, depth: 3, key: 1 },
       { type: "END_ARRAY", index: 7, depth: 2 },
-      { type: "END_OBJECT", index: 8, depth: 1 },
-      { type: "END_OBJECT", index: 9, depth: 0 },
     ]);
   });
 
@@ -87,25 +85,21 @@ describe("JsonStreamTokenizer", () => {
       { type: "BEGIN_OBJECT", key: 0, depth: 2, index: 5 },
       { type: "STRING", value: "Fluffy", depth: 3, key: "name", index: 6 },
       { type: "STRING", value: "cat", depth: 3, key: "type", index: 7 },
-      { type: "END_OBJECT", depth: 2, index: 8 },
-      { type: "BEGIN_OBJECT", key: 1, depth: 2, index: 9 },
-      { type: "STRING", value: "Fido", depth: 3, key: "name", index: 10 },
-      { type: "STRING", value: "dog", depth: 3, key: "type", index: 11 },
-      { type: "END_OBJECT", depth: 2, index: 12 },
-      { type: "END_ARRAY", depth: 1, index: 13 },
-      { type: "BEGIN_OBJECT", key: "address", depth: 1, index: 14 },
+      { type: "BEGIN_OBJECT", key: 1, depth: 2, index: 8 },
+      { type: "STRING", value: "Fido", depth: 3, key: "name", index: 9 },
+      { type: "STRING", value: "dog", depth: 3, key: "type", index: 10 },
+      { type: "END_ARRAY", depth: 1, index: 11 },
+      { type: "BEGIN_OBJECT", key: "address", depth: 1, index: 12 },
       {
         type: "STRING",
         value: "123 Main St",
         depth: 2,
         key: "street",
-        index: 15,
+        index: 13,
       },
-      { type: "STRING", value: "Anytown", depth: 2, key: "city", index: 16 },
-      { type: "STRING", value: "CA", depth: 2, key: "state", index: 17 },
-      { type: "STRING", value: "12345", depth: 2, key: "zip", index: 18 },
-      { type: "END_OBJECT", depth: 1, index: 19 },
-      { type: "END_OBJECT", depth: 0, index: 20 },
+      { type: "STRING", value: "Anytown", depth: 2, key: "city", index: 14 },
+      { type: "STRING", value: "CA", depth: 2, key: "state", index: 15 },
+      { type: "STRING", value: "12345", depth: 2, key: "zip", index: 16 },
     ]);
 
     parser.end();
