@@ -22,7 +22,7 @@ function VirtualizedPanel(props: Props) {
   const start = () =>
     Math.max(1, Math.floor((throttleScrollY() - buffer) / lineHeight));
   const end = () =>
-    Math.floor((viewportHeight + throttleScrollY() + buffer) / lineHeight);
+    Math.min(Math.floor((viewportHeight + throttleScrollY() + buffer) / lineHeight), props.list.length - 1);
 
   const classMap = {
     BEGIN_ARRAY: "object-array",
