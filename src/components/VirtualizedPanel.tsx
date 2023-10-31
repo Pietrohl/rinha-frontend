@@ -22,7 +22,10 @@ function VirtualizedPanel(props: Props) {
   const start = () =>
     Math.max(1, Math.floor((throttleScrollY() - buffer) / lineHeight));
   const end = () =>
-    Math.min(Math.floor((viewportHeight + throttleScrollY() + buffer) / lineHeight), props.list.length - 1);
+    Math.min(
+      Math.floor((viewportHeight + throttleScrollY() + buffer) / lineHeight),
+      props.list.length - 1
+    );
 
   const classMap = {
     BEGIN_ARRAY: "object-array",
@@ -33,7 +36,7 @@ function VirtualizedPanel(props: Props) {
     NUMBER: "object-number",
     BOOLEAN: "object-boolean",
     NULL: "object-null",
-    error: ""
+    error: "",
   };
 
   return (
@@ -68,6 +71,7 @@ function VirtualizedPanel(props: Props) {
 
               return (
                 <div
+                  tabIndex={0}
                   class={`object ${classMap[item.type]}`}
                   style={{
                     padding: "0",
