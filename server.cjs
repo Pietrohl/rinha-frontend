@@ -4,7 +4,7 @@ const path = require('path');
 
 const server = http.createServer((req, res) => {
   // Get the file path from the request URL
-  const filePath = path.join(__dirname, 'public', req.url);
+  const filePath = path.join(__dirname, 'docs', req.url);
 
   // Check if the file exists
   fs.access(filePath, fs.constants.F_OK, (err) => {

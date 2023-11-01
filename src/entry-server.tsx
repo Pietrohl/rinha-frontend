@@ -6,7 +6,7 @@ import App from "./App";
 export default () => {
   return renderToStringAsync(() => <App />).then((html) => {
     return fs
-      .readFileSync(path.join(process.cwd(), "public/index.html"), "utf-8")
+      .readFileSync(path.join(process.cwd(), "docs/index.html"), "utf-8")
       .replace("<!--#include HydrationScript -->", generateHydrationScript())
       .replace("<!--#include App -->", html);
   });
