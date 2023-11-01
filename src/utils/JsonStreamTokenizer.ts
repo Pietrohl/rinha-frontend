@@ -83,14 +83,19 @@ export class JsonStreamTokenizer {
     }
   }
 
-  private emit(token: Token[]) {
-    token?.forEach((token) => {
-      if (token.type === "END_OBJECT") return;
-      token.index = this.count++;
-    });
+  private emit(tokens: Token[]) {
+    let j = 0;
 
+    tokens.forEach((token, i) => {
+      if (!(token.type === "END_OBJECT")) {
+        if (i !== j) tokens[j] = token;
+        token.index = this.count++;
+        j++;
+      }
+    });
+    tokens.length = j;
     for (const listener of this.listeners) {
-      listener(token);
+      listener(tokens);
     }
   }
 

@@ -19,13 +19,14 @@ function VirtualizedPanel(props: Props) {
   const lineHeight = 28.244;
   const viewportHeight = isServer ? 0 : window.innerHeight;
   const buffer = 500;
-  const start = () =>
-    Math.max(1, Math.floor((throttleScrollY() - buffer) / lineHeight));
   const end = () =>
     Math.min(
       Math.floor((viewportHeight + throttleScrollY() + buffer) / lineHeight),
       props.list.length - 1
     );
+    
+  const start = () => 
+    Math.min(Math.max(1, Math.floor((throttleScrollY() - buffer) / lineHeight)), props.list.length - 100);
 
   const classMap = {
     BEGIN_ARRAY: "object-array",
@@ -81,7 +82,7 @@ function VirtualizedPanel(props: Props) {
                     top: `${(item.index || index()) * lineHeight}px`,
                   }}
                 >
-                  <For each={Array(item.depth - 1)} fallback={""}>
+                  <For each={Array(Math.max(0,item.depth - 1))} fallback={""}>
                     {() => <span class="padding"></span>}
                   </For>
 

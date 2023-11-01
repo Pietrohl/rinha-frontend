@@ -5,7 +5,7 @@ import { createMutable } from "solid-js/store";
 import { JsonStreamTokenizer, Token } from "./utils/JsonStreamTokenizer";
 import { isServer } from "solid-js/web";
 
-let buffer = new ArrayBuffer(67108864);
+let buffer = new ArrayBuffer(262144);
 const parser = new JsonStreamTokenizer();
 
 function App() {
@@ -69,7 +69,6 @@ function App() {
             );
             const chunck = utf8Decoder.decode(value, { stream: true });
             parser.processChunk(chunck);
-            await new Promise((resolve) => setTimeout(resolve, 0));
           }
         }
       },
