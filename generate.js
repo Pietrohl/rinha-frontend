@@ -6,8 +6,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PAGES = ["index"];
 const pathToServer = path.resolve(__dirname, "lib/entry-server.js");
-const pathToPublic = path.resolve(__dirname, "public");
-const templateHTML = path.resolve(__dirname, "public/index.html");
+const pathToPublic = path.resolve(__dirname, "docs");
+const templateHTML = path.resolve(__dirname, "docs/index.html");
 
 renderStatic(
   PAGES.map(p => ({
