@@ -1,3 +1,4 @@
+import { isServer } from "solid-js/web";
 import mdWorker from "./md-jsonStreamTokenizer?worker";
 
 export enum State {
@@ -40,14 +41,14 @@ type TokenListener = (token: Token[]) => void;
 
 export class JsonStreamTokenizer {
   private listeners: TokenListener[] = [];
-  private worker: Worker;
+  private worker?: Worker;
   private count = 0;
 
   private onMessage = (e: MessageEvent<Token[]>) => {
     const { type } = e.data[0];
     switch (type) {
       case "end":
-        this.worker.terminate();
+        this.worker?.terminate();
         this.emit([{ type: "end", depth: 0 }]);
         break;
       default:
@@ -60,6 +61,7 @@ export class JsonStreamTokenizer {
   };
 
   constructor() {
+    if (isServer) return;
     if (window.Worker) {
       this.worker = new mdWorker();
       this.worker.onerror = this.onError;
@@ -93,10 +95,12 @@ export class JsonStreamTokenizer {
   }
 
   end() {
-    this.worker.postMessage({ type: "end" });
+    this.worker?.postMessage({ type: "end" });
   }
 
   processChunk(chunk: string) {
+    if (isServer) return;
+
     if (window.Worker) {
       if (!this.worker) {
         this.worker = new mdWorker();
@@ -105,6 +109,6 @@ export class JsonStreamTokenizer {
       }
     }
 
-    this.worker.postMessage({ type: "chunk", data: chunk });
+    this.worker?.postMessage({ type: "chunk", data: chunk });
   }
 }

@@ -1,4 +1,38 @@
-import { State, Token } from "./JsonStreamTokenizer";
+export enum State {
+  START,
+  EXPECT_STRING_KEY_OR_END,
+  EXPECT_COLON,
+  EXPECT_VALUE,
+  IN_STRING_VALUE,
+  IN_NUMBER,
+  IN_ESCAPE,
+  IN_ARRAY,
+  IN_OBJECT,
+  IN_KEY,
+  IN_FALSE,
+  IN_TRUE,
+  IN_NULL,
+}
+
+type TokenDataType =
+  | "BEGIN_OBJECT"
+  | "END_OBJECT"
+  | "BEGIN_ARRAY"
+  | "END_ARRAY"
+  | "STRING"
+  | "NUMBER"
+  | "BOOLEAN"
+  | "NULL"
+  | "end"
+  | "error";
+
+export interface Token {
+  type: TokenDataType;
+  depth: number;
+  key?: string | number;
+  value?: any;
+  index?: number;
+}
 
 let state: State[] = [State.START];
 let buffer: string = "";
@@ -21,12 +55,9 @@ function getNextArrayIndex() {
   return key;
 }
 
-
-function cacheToken(token: Token){
+function cacheToken(token: Token) {
   cachedTokens.push(token);
 }
-
-
 
 function processChunk(chunk: string) {
   cachedTokens = [];
@@ -36,10 +67,6 @@ function processChunk(chunk: string) {
   }
   self.postMessage(cachedTokens);
 }
-
-
-
-
 
 function processChar(char: string) {
   switch (state[state.length - 1]) {
@@ -319,4 +346,3 @@ self.onmessage = ({
 self.onerror = function (message) {
   self.postMessage([{ type: "error", value: message }]);
 };
-

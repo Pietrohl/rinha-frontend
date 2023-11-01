@@ -131,12 +131,8 @@ describe("JsonStreamTokenizer", () => {
       tokens.push(token);
     });
 
-    const jsonString = validJson;
-
     expect(() => {
-      for (let char of jsonString) {
-        parser.processChar(char);
-      }
+      parser.processChunk(validJson);
       parser.end();
     }).not.toThrowError();
   });
@@ -150,12 +146,9 @@ describe("JsonStreamTokenizer", () => {
       tokens.push(token);
     });
 
-    const jsonString = validJson;
-
     expect(() => {
-      for (let char of jsonString) {
-        parser.processChar(char);
-      }
+      parser.processChunk(validJson);
+
       parser.end();
     }).not.toThrowError();
   });
@@ -169,12 +162,9 @@ describe("JsonStreamTokenizer", () => {
       tokens.push(token);
     });
 
-    const jsonString = validJson;
-
     expect(() => {
-      for (let char of jsonString) {
-        parser.processChar(char);
-      }
+      parser.processChunk(validJson);
+
       parser.end();
     }).not.toThrowError();
   });
@@ -189,9 +179,7 @@ describe("JsonStreamTokenizer", () => {
     });
 
     expect(() => {
-      for (let char of validJson) {
-        parser.processChar(char);
-      }
+      parser.processChunk(validJson);
       parser.end();
     }).not.toThrowError();
   });
@@ -209,12 +197,9 @@ describe("JsonStreamTokenizer", () => {
       tokens.push(token);
     });
 
-    const jsonString = validJson;
-
     expect(() => {
-      for (let char of jsonString) {
-        parser.processChar(char);
-      }
+      parser.processChunk(validJson);
+
       parser.end();
     }).not.toThrowError();
   });
