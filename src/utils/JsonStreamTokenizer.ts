@@ -25,6 +25,7 @@ type TokenDataType =
   | "NUMBER"
   | "BOOLEAN"
   | "NULL"
+  | "end"
   | "error";
 
 export interface Token {
@@ -35,29 +36,34 @@ export interface Token {
   index?: number;
 }
 
-type TokenListener = (token?: Token, error?: Error) => void;
+type TokenListener = (token: Token[]) => void;
 
 export class JsonStreamTokenizer {
   private listeners: TokenListener[] = [];
   private worker: Worker;
   private count = 0;
 
+  private onMessage = (e: MessageEvent<Token[]>) => {
+    const { type } = e.data[0];
+    switch (type) {
+      case "end":
+        this.worker.terminate();
+        this.emit([{ type: "end", depth: 0 }]);
+        break;
+      default:
+        this.emit(e.data);
+    }
+  };
+
+  private onError = (e: ErrorEvent) => {
+    this.emit([{ type: "error", value: e.message, depth: 0 }]);
+  };
+
   constructor() {
     if (window.Worker) {
       this.worker = new mdWorker();
-      this.worker.onerror = (e) => {
-        this.emit({ type: "error", value: e.message, depth: 0 });
-      };
-      this.worker.addEventListener("message", (e) => {
-        const { type } = e.data;
-        switch (type) {
-          case "end":
-            this.worker.terminate();
-            break;
-          default:
-            this.emit(e.data);
-        }
-      });
+      this.worker.onerror = this.onError;
+      this.worker.onmessage = this.onMessage;
     } else {
       throw new Error("Web Worker not supported");
     }
@@ -75,19 +81,14 @@ export class JsonStreamTokenizer {
     }
   }
 
-  private emit(token?: Token, error?: Error) {
-    if (error) {
-      for (const listener of this.listeners) {
-        listener(undefined, error);
-      }
-      return;
-    }
-    if (token) {
+  private emit(token: Token[]) {
+    token?.forEach((token) => {
       if (token.type === "END_OBJECT") return;
       token.index = this.count++;
-      for (const listener of this.listeners) {
-        listener(token);
-      }
+    });
+
+    for (const listener of this.listeners) {
+      listener(token);
     }
   }
 
@@ -99,19 +100,8 @@ export class JsonStreamTokenizer {
     if (window.Worker) {
       if (!this.worker) {
         this.worker = new mdWorker();
-        this.worker.onerror = (e) => {
-          this.emit({ type: "error", value: e.message, depth: 0 });
-        };
-        this.worker.addEventListener("message", (e) => {
-          const { type } = e.data;
-          switch (type) {
-            case "end":
-              this.worker.terminate();
-              break;
-            default:
-              this.emit(e.data);
-          }
-        });
+        this.worker.onerror = this.onError;
+        this.worker.onmessage = this.onMessage;
       }
     }
 

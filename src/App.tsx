@@ -17,12 +17,15 @@ function App() {
   // parhaps change this so that receive an array of tokens?
   parser.subscribe((token) => {
     if (token && !list.error) {
-      if (token.type === "error") {
+      if (token.some(({ type }) => type === "error")) {
         list.items = [];
         list.error = "Invalid Json!";
         return;
       }
-      list.items.push(token);
+      if (token[token.length - 1].type === "end") {
+        list.done = true;
+      }
+      list.items.push(...token);
     }
   });
 
@@ -40,6 +43,7 @@ function App() {
         const stream = file.stream().getReader({ mode: "byob" });
         list.items = [];
         list.error = "";
+        list.done = false;
 
         while (true) {
           let bufferView = new Uint8Array(buffer);

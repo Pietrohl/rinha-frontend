@@ -36,6 +36,7 @@ function VirtualizedPanel(props: Props) {
     NUMBER: "object-number",
     BOOLEAN: "object-boolean",
     NULL: "object-null",
+    end: "",
     error: "",
   };
 

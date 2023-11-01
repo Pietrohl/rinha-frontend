@@ -1,10 +1,12 @@
-import { State } from "./JsonStreamTokenizer";
+import { State, Token } from "./JsonStreamTokenizer";
 
 let state: State[] = [State.START];
 let buffer: string = "";
 let depth: number = 0;
 let arrayIndices: number[] = [];
 let keyStack: (string | number)[] = [];
+
+let cachedTokens: Token[] = [];
 
 function getCurrentKey() {
   return keyStack.slice(-1)[0];
@@ -19,11 +21,25 @@ function getNextArrayIndex() {
   return key;
 }
 
+
+function cacheToken(token: Token){
+  cachedTokens.push(token);
+}
+
+
+
 function processChunk(chunk: string) {
+  cachedTokens = [];
+
   for (let char of chunk) {
     processChar(char);
   }
+  self.postMessage(cachedTokens);
 }
+
+
+
+
 
 function processChar(char: string) {
   switch (state[state.length - 1]) {
@@ -35,14 +51,14 @@ function processChar(char: string) {
         const value = Number(buffer);
         buffer = "";
         if (keyStack.length > 0) {
-          postMessage({
+          cacheToken({
             type: "NUMBER",
             value,
             depth: depth,
             key: keyStack.pop(),
           });
         } else {
-          postMessage({
+          cacheToken({
             type: "NUMBER",
             value,
             depth: depth - 1,
@@ -57,14 +73,14 @@ function processChar(char: string) {
       if (char === "{") {
         state.pop();
         state.push(State.EXPECT_STRING_KEY_OR_END);
-        postMessage({ type: "BEGIN_OBJECT", depth: depth });
+        cacheToken({ type: "BEGIN_OBJECT", depth: depth });
         depth++;
       } else if (char === "[") {
         state.pop();
         state.push(State.IN_ARRAY);
         arrayIndices.push(0);
         keyStack.push(getNextArrayIndex());
-        postMessage({ type: "BEGIN_ARRAY", depth: depth });
+        cacheToken({ type: "BEGIN_ARRAY", depth: depth });
         depth++;
       } else if (char !== "" && char !== "]" && char !== "}") {
         throw new Error("Unexpected character at start");
@@ -75,7 +91,7 @@ function processChar(char: string) {
       if (char === "}") {
         state.pop();
         depth--;
-        postMessage({ type: "END_OBJECT", depth: depth });
+        cacheToken({ type: "END_OBJECT", depth: depth });
       } else if (char === '"') {
         state.push(State.IN_KEY);
         buffer = "";
@@ -107,7 +123,7 @@ function processChar(char: string) {
       if (char === "{") {
         state.pop();
         state.push(State.EXPECT_STRING_KEY_OR_END);
-        postMessage({
+        cacheToken({
           type: "BEGIN_OBJECT",
           depth: depth,
           key: keyStack.pop(),
@@ -119,7 +135,7 @@ function processChar(char: string) {
       } else if (char === "[") {
         state.pop();
         state.push(State.IN_ARRAY);
-        postMessage({
+        cacheToken({
           type: "BEGIN_ARRAY",
           depth: depth,
           key: keyStack.pop(),
@@ -158,7 +174,7 @@ function processChar(char: string) {
       if ("true".includes(buffer)) {
         if (buffer === "true") {
           state.pop();
-          postMessage({
+          cacheToken({
             type: "BOOLEAN",
             value: true,
             depth: depth,
@@ -175,7 +191,7 @@ function processChar(char: string) {
       if ("false".includes(buffer)) {
         if (buffer === "false") {
           state.pop();
-          postMessage({
+          cacheToken({
             type: "BOOLEAN",
             value: false,
             depth: depth,
@@ -192,7 +208,7 @@ function processChar(char: string) {
       if ("null".includes(buffer)) {
         if (buffer === "null") {
           state.pop();
-          postMessage({
+          cacheToken({
             type: "NULL",
             value: null,
             depth: depth,
@@ -212,14 +228,14 @@ function processChar(char: string) {
         const value = buffer;
         buffer = "";
         if (keyStack.length > 0) {
-          postMessage({
+          cacheToken({
             type: "STRING",
             value,
             depth: depth,
             key: keyStack.pop(),
           });
         } else {
-          postMessage({
+          cacheToken({
             type: "STRING",
             value,
             depth: depth - 1,
@@ -241,10 +257,10 @@ function processChar(char: string) {
         keyStack.pop();
         arrayIndices.pop();
         state.pop();
-        postMessage({ type: "END_ARRAY", depth: --depth });
+        cacheToken({ type: "END_ARRAY", depth: --depth });
       } else if (char === "{") {
         state.push(State.EXPECT_STRING_KEY_OR_END);
-        postMessage({
+        cacheToken({
           type: "BEGIN_OBJECT",
           depth: depth,
           key: keyStack.pop(),
@@ -252,7 +268,7 @@ function processChar(char: string) {
         depth++;
       } else if (char === "[") {
         state.push(State.IN_ARRAY);
-        postMessage({
+        cacheToken({
           type: "BEGIN_ARRAY",
           depth: depth,
           key: keyStack.pop(),
@@ -284,14 +300,14 @@ function processChar(char: string) {
   }
 }
 
-onmessage = ({
+self.onmessage = ({
   data,
 }: MessageEvent<{ data: string; type: "chunk" | "end" }>) => {
   if (data.type === "end") {
     if (state.length > 0 || depth > 0) {
       throw new Error("Unexpected end of file");
     }
-    postMessage({ type: "end" });
+    self.postMessage([{ type: "end" }]);
     return;
   }
 
@@ -301,5 +317,6 @@ onmessage = ({
 };
 
 self.onerror = function (message) {
-  postMessage({ type: "error", value: message });
+  self.postMessage([{ type: "error", value: message }]);
 };
+
