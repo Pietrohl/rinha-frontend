@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && run-s build:*",
-    "build:client": "vite build --outDir docs --base=docs",
+    "build:client": "vite build --outDir . ",
     "build:server": "vite build --outDir lib --ssr src/entry-server.tsx",
     "build:static": "node generate.js",
     "preview": "vite preview --outDir docs",
