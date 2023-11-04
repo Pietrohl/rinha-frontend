@@ -65,7 +65,7 @@ function processChunk(chunk: string) {
   for (let char of chunk) {
     processChar(char);
   }
-  self.postMessage(cachedTokens);
+  if (cacheToken.length > 0) self.postMessage(cachedTokens);
 }
 
 function processChar(char: string) {

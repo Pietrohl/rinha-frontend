@@ -45,6 +45,10 @@ export class JsonStreamTokenizer {
   private count = 0;
 
   private onMessage = (e: MessageEvent<Token[]>) => {
+    if (!Array.isArray(e.data)|| !e.data[0]) {
+      console.log("Wrong message from ws", e);
+      return;
+    }
     const { type } = e.data[0];
     switch (type) {
       case "end":

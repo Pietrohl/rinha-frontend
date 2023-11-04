@@ -14,7 +14,6 @@ function App() {
   const list = createMutable({ error: "", done: true, items: [] as Token[] });
   const [fileContent, setFileContent] = createSignal<File | undefined>();
 
-  // parhaps change this so that receive an array of tokens?
   parser.subscribe((token) => {
     if (token && !list.error) {
       if (token.some(({ type }) => type === "error")) {
@@ -25,6 +24,7 @@ function App() {
       if (token[token.length - 1].type === "end") {
         list.done = true;
       }
+      
       list.items.push(...token);
     }
   });
@@ -79,6 +79,10 @@ function App() {
   let inputRef: HTMLInputElement | undefined;
   return (
     <>
+    {/* <div style={{position: "absolute", top: '0px'}}>
+      Done: {list.done.toString()}
+      List: {list.items.length}
+    </div> */}
       <Switch fallback={<div>Loading...</div>}>
         <Match when={!(list.items.length > 0) || list.error}>
           <div class="container">
